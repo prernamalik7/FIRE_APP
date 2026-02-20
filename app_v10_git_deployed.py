@@ -24,18 +24,19 @@ st.set_page_config(
     layout="wide"
 )
 
-# =========================
-# Header Section with Pie
-# =========================
-header_col1, header_col2 = st.columns([3, 2])
+# App Title
+st.title("🔥 FIRE Planner")
+st.subheader("Financial Independence, Retire Early")
 
-with header_col1:
-    st.title("🔥 FIRE Planner")
-    st.subheader("Financial Independence, Retire Early")
-    st.markdown(
-        " **Know your number. Track your progress. Own your freedom.**"
-    )
+# Catchy Tagline
+st.markdown(
+    " **Know your number. Track your progress. Own your freedom.**\n\n"
+)
 
+
+# =========================
+# Sidebar Inputs
+# =========================
 # =========================
 # Sidebar Inputs
 # =========================
@@ -185,134 +186,57 @@ if run:
             fire_age = df_yearly["Age"].iloc[i]
             break
 
+    retirement_date = dob + timedelta(days=int(retirement_age*365.25))
 
     # =========================
-    # Time Until FIRE
-    # =========================
-    years_to_fire = None
-    months_to_fire = None
-
-    if fire_age:
-        total_years_float = fire_age - age
-        years_to_fire = int(total_years_float)
-        months_to_fire = int((total_years_float - years_to_fire) * 12)
-
-    # Retirement date should ALWAYS exist
-    retirement_date = dob + timedelta(days=int(retirement_age * 365.25))
-
-
-    # =========================
-    # Dashboard with vertical dividers
-    # =========================
-    # =========================
-    # Dashboard with smaller font
+    # Dashboard with explanatory hover texts
     # =========================
     st.subheader("📊 FIRE Dashboard")
-
-    col1, col2, col3, col4, col5 = st.columns([1,1,1,1,1.2])
-
-    # Helper to render a metric with smaller value font
-    def metric_html(title, value, help_text=None):
-        help_icon = f"<span title='{help_text}' style='cursor:help'>🛈</span>" if help_text else ""
-        st.markdown(
-            f"""
-            <div style='text-align:center;'>
-                <div style='font-weight:bold;font-size:16px;margin-bottom:5px;'>{title} {help_icon}</div>
-                <div style='font-size:20px;color:#1f77b4;font-weight:bold;'>{value}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    col1, col2, col3, col4, col5 = st.columns([1,1,1,1,0.5])
 
     # 🔥 FIRE Number
-    fire_text = f"You need ${fire_number:,.0f} to retire at age {retirement_age}. Based on 4% rule (you can withdraw 4% per year to cover your expenses) and adjusted for inflation"
-    with col1:
-        metric_html("🔥 FIRE Number", f"${fire_number:,.0f}", fire_text)
+    fire_text = (
+        f"You need ${fire_number:,.0f} to retire at age {retirement_age}. "
+        "This is based on the 4% safe withdrawal rule — you can withdraw 4% per year to cover your expenses."
+    )
+    col1.metric("🔥 FIRE Number", f"${fire_number:,.0f}", help=fire_text)
 
     # 💰 Final Portfolio
-    final_text = f"Projected portfolio at age {life_expectancy if retirement_age < life_expectancy else retirement_age}."
-    with col2:
-        metric_html("💰 Final Portfolio", f"${final_nominal:,.0f}", final_text)
+    final_text = (
+        f"Your projected portfolio at age {life_expectancy if retirement_age < life_expectancy else retirement_age} is ${final_nominal:,.0f}. "
+        "This includes all your contributions and investment growth."
+    )
+    col2.metric("💰 Final Portfolio", f"${final_nominal:,.0f}", help=final_text)
 
     # 📈 Real Portfolio
-    real_text = f"Inflation-adjusted portfolio value — It shows what your money is worth in todays dollars."
-    with col3:
-        metric_html("📈 Real Portfolio", f"${final_real:,.0f}", real_text)
+    real_text = (
+        f"This is the inflation-adjusted portfolio value: ${final_real:,.0f}. "
+        "It shows what your money is worth in today's dollars."
+    )
+    col3.metric("📈 Real Portfolio", f"${final_real:,.0f}", help=real_text)
 
     # 🎯 Retirement Date
-    retirement_text = f"Your desired retirement date is {retirement_date.strftime('%b %d, %Y')}. This is when you plan to start using your money to cover living expenses."
-    with col4:
-        metric_html("🎯 Retirement Date", retirement_date.strftime("%b %d, %Y"), retirement_text)
-
-    # 🥂 Work Becomes Optional
-    if fire_age:
-        work_optional_date = dob + timedelta(days=fire_age*365.25)
-        work_optional_str = work_optional_date.strftime("%b %d, %Y")
-        work_optional_text = "This is the date when your portfolio can fully cover your expenses — work becomes optional!"
-        with col5:
-            metric_html("🥂 Work Becomes Optional", work_optional_str, work_optional_text)
-
-
-
-
-
-
-
-
-
-
-
+    retirement_text = (
+        f"You will reach retirement age on {retirement_date.strftime('%b %d, %Y')}. "
+        "This is when you can start using your money to cover living expenses."
+    )
+    col4.metric("🎯 Retirement Date", retirement_date.strftime("%b %d, %Y"), help=retirement_text)
 
     # Pie chart: Contributions vs Growth
     total_contrib = savings + monthly_investment*12*max(0, retirement_age-age)
     growth = final_nominal - total_contrib
-    with header_col2:
-
-        fig_donut = go.Figure(data=[go.Pie(
-            labels=["Your Contributions", "Investment Growth"],
-            values=[max(total_contrib,0), max(growth,0)],
-            hole=0.55,
-            marker=dict(colors=["#1f77b4", "#00c853"]),
-            hovertemplate=(
-                "<b>%{label}</b><br>"
-                "Amount: $%{value:,.0f}<br>"
-                "Share: %{percent}<extra></extra>"
-            ),
-            textinfo="none"
-        )])
-
-        fig_donut.update_layout(
-            showlegend=True,  # 👈 bring legend back
-            legend=dict(
-                orientation="h",           # horizontal legend
-                yanchor="bottom",
-                y=-0.15,                   # place slightly below donut
-                xanchor="center",
-                x=0.5,
-                font=dict(size=12)
-            ),
-            height=250,                    # compact height
-            margin=dict(t=10, b=40, l=10, r=10),  # extra bottom space for legend
-            template="plotly_white",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)"
+    with col5:
+        fig2, ax2 = plt.subplots(figsize=(2.5,2.5))
+        ax2.pie(
+            [max(total_contrib,0), max(growth,0)],
+            labels=["Contributions", "Investment Growth"],
+            autopct="%1.0f%%",
+            startangle=90,
+            colors=["#4e79a7","#f28e2b"]
         )
-
-        st.plotly_chart(fig_donut, use_container_width=True)
-
-
-
-
-        # Add spacing and a thin grey line before the FIRE Progress Tracker
-    st.markdown(
-        """
-        <div style="margin-top:30px;margin-bottom:20px;">
-            <hr style="border:0.5px solid #d3d3d3;">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+        ax2.set_title("Wealth Sources", fontsize=10)
+        st.pyplot(fig2)
+    st.caption("_____________________________________________")
 
     # =========================
     # Gamified FIRE Tracker
@@ -409,6 +333,7 @@ if run:
     st.markdown(
         f"### 🔥 {fire_progress*100:,.1f}% Complete"
     )
+
 
 
 
@@ -568,87 +493,10 @@ if run:
     st.plotly_chart(fig, use_container_width=True)
 
 
-    st.divider()
 
 
 
-    # =========================
-    # 🎉 FIRE Messaging
-    # =========================
-    # =========================
-    # 🎉 FIRE Messaging with Exact Date
-    # =========================
-    if fire_age:
 
-        # Exact date when work becomes optional
-        work_optional_date = dob + timedelta(days=fire_age*365.25)  # keep fractional part
-        work_optional_str = work_optional_date.strftime("%b %d, %Y")  # e.g., Jan 01, 2030
-
-        # Years and months until FIRE
-        total_years_float = fire_age - age
-        years_to_fire = int(total_years_float)
-        months_to_fire = int(round((total_years_float - years_to_fire) * 12))
-
-        # -------------------------
-        # 🎉 Already Financially Independent
-        # -------------------------
-        if years_to_fire == 0 and months_to_fire == 0:
-            st.success("🎉 Congratulations — You’re Financially Independent!")
-
-            st.markdown(
-                f"""
-    ## 🥂 Work Is Officially Optional
-
-    At age {age:.1f}, your portfolio already supports  
-    **${monthly_expenses:,.0f}/month** through age **{life_expectancy}**.  
-
-    Work becomes optional on **{work_optional_str}**.
-
-    You built this. Freedom isn’t coming — it’s here.
-    """
-            )
-            st.balloons()
-
-        # -------------------------
-        # 🔥 Less than 1 year to FIRE
-        # -------------------------
-        elif years_to_fire == 0 and months_to_fire > 0:
-            st.markdown(
-                f"""
-    ## 🔥 Final Stretch — {months_to_fire} Month{'s' if months_to_fire > 1 else ''} to Freedom
-
-    At your current pace — **${monthly_investment:,.0f}/month** invested at **{return_rate}%** — you reach Financial Independence at **age {fire_age:.1f}** (**{work_optional_str}**).
-
-    That supports **${monthly_expenses:,.0f}/month** until **{life_expectancy}**.
-
-    Stay consistent — you’re almost there!
-    """
-            )
-
-        # -------------------------
-        # 🚀 More than 1 year to FIRE
-        # -------------------------
-        else:
-            st.markdown(
-                f"""
-    ### 🔥 You’re {years_to_fire} Year{'s' if years_to_fire > 1 else ''} From Optional Work
-
-    At your current pace — **${monthly_investment:,.0f}/month** invested at **{return_rate}%** — you reach Financial Independence at **age {fire_age:.1f}** (**{work_optional_str}**).
-
-    That supports **${monthly_expenses:,.0f}/month** until **{life_expectancy}**.
-
-    Stay consistent. Time does the heavy lifting.
-    """
-            )
-
-    # -------------------------
-    # ⚠️ FIRE Not Reached
-    # -------------------------
-    else:
-        st.warning(
-            "Based on these assumptions, you do not reach Financial Independence within your projected lifespan. "
-            "Consider increasing your monthly investments or adjusting retirement spending."
-        )
 
 
 
