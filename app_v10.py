@@ -67,25 +67,25 @@ monthly_expenses = st.sidebar.number_input(
 
 retirement_age = st.sidebar.number_input(
     "Retirement Age",
-    18, 80, 50,
+    18, 90, 70,
     help="The age you plan to stop working. Typical FIRE enthusiasts retire between 40–55."
 )
 
 life_expectancy = st.sidebar.number_input(
     "Life Expectancy Age",
-    50, 100, 85,
+    30, 100, 85,
     help="How long you expect to live. This helps estimate how long your portfolio needs to last."
 )
 
 return_rate = st.sidebar.slider(
     "Expected Annual Return (%)",
-    1, 15, 7,
+    1, 30, 7,
     help="Projected annual growth of your investments. For a broad index fund, 6–8% is common historically."
 )
 
 inflation = st.sidebar.slider(
     "Inflation (%)",
-    0, 10, 3,
+    0, 15, 3,
     help="Expected annual inflation rate. Historically, inflation is around 2–3% per year."
 )
 
