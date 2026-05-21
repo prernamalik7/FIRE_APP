@@ -652,6 +652,32 @@ if run:
 
 
 
+    # Calculate sustainable spending if retired today
+    years_remaining = life_expectancy - age
+    real_return = ((1 + return_rate / 100) / (1 + inflation / 100)) - 1
+
+    if real_return > 0 and years_remaining > 0:
+        annuity_factor = (real_return * (1 + real_return) ** years_remaining) / ((1 + real_return) ** years_remaining - 1)
+        sustainable_annual_spending = savings * annuity_factor
+    else:
+        sustainable_annual_spending = savings / years_remaining if years_remaining > 0 else 0
+
+    sustainable_monthly_spending = sustainable_annual_spending / 12
+
+    # Render clean Markdown message using the same style as FIRE Messaging
+
+
+    savings_val = int(savings)
+    spending_val = int(sustainable_monthly_spending)
+
+    st.markdown(
+        "## If you stop working today!\n\n"
+        f"💡 If you retired today ({date.today():%b %d, %Y}) with ${savings_val:,}, "
+        f"you could enjoy spending about ${spending_val:,}/month until age {life_expectancy} —\n"
+        f"assuming your investments earn {return_rate}% annually and inflation stays near {inflation}%."
+    )
+
+
 
 
 
