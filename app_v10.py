@@ -89,7 +89,7 @@ inflation = st.sidebar.slider(
     help="Expected annual inflation rate. Historically, inflation is around 2–3% per year."
 )
 
-run = st.sidebar.button("🚀 Run Simulation")
+run = st.sidebar.button("🚀 RUN!")
 
 
 # =========================
